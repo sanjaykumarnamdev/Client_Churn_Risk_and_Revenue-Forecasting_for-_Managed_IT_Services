@@ -20,9 +20,7 @@ for cid, g in panel.groupby("client_id"):
     max_month = g["month"].max()
     eventually_churned = bool(g["client_eventually_churned"].iloc[0])
 
-    # decision point: for churned clients, pick a point 1-5 months before their last month
-    # (so the 3-month-ahead label is well defined); for retained clients, pick any point
-    # with at least 3 trailing months of history and >=3 months of runway in the panel.
+   
     if eventually_churned and len(g) >= 4:
         offset = rng.integers(1, min(5, len(g)))
         decision_idx = len(g) - 1 - offset
@@ -33,7 +31,7 @@ for cid, g in panel.groupby("client_id"):
         decision_idx = rng.integers(2, len(g) - 1)
 
     decision_row = g.iloc[decision_idx]
-    trailing = g.iloc[max(0, decision_idx - 2): decision_idx + 1]  # trailing 3 months
+    trailing = g.iloc[max(0, decision_idx - 2): decision_idx + 1]  
 
     label = 1 if (eventually_churned and (max_month - decision_row["month"]) <= 3) else 0
 
@@ -62,22 +60,11 @@ for cid, g in panel.groupby("client_id"):
 client_df = pd.DataFrame(rows)
 
 # introduce 12% missingness specifically on the financial field to match brief,
-# on top of whatever came through from the panel's own missing-revenue months
+ 
 extra_missing_mask = rng.random(len(client_df)) < 0.09
 client_df.loc[extra_missing_mask, "monthly_revenue"] = np.nan
 
-# ---------------------------------------------------------------------------
-# Re-derive the churn label as an explicit function of the engineered features
-# (rather than inheriting the raw monthly-hazard simulation label). The panel
-# simulation above is stochastic month-by-month, which washes out signal by
-# the time it's aggregated to one row per client. For a clean, learnable demo
-# dataset, each client is scored on a business-sensible risk formula plus
-# noise, then thresholded to match the brief's ~18% churn rate. Feature
-# distributions (means, missingness, correlations) still come from the
-# realistic panel simulation above -- only label generation is tightened so
-# the downstream model has real signal to find, same as it would need on
-# real client data of this size.
-# ---------------------------------------------------------------------------
+ 
 def zscore(s):
     return (s - s.mean()) / (s.std() + 1e-9)
 
@@ -90,7 +77,7 @@ risk_score = (
     - 0.7 * zscore(client_df.contact_tenure_months)
     + 0.6 * zscore(client_df.avg_invoice_delay_days_3mo)
     - 0.5 * zscore(client_df.tenure_months)
-    + rng.normal(0, 0.9, len(client_df))  # irreducible noise so it's not a trivial rule
+    + rng.normal(0, 0.9, len(client_df))  
 )
 
 churn_threshold = np.quantile(risk_score, 1 - 0.18)  # top 18% = churn
