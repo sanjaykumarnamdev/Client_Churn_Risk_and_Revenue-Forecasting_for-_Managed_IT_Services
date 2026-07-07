@@ -1,0 +1,6 @@
+12-Month Revenue Forecast Summary
+========================================
+Scenario A (business as usual): $22,422,411  [90% CI $21,791,264 - $23,014,909]
+Scenario B (churn -5pts): $23,254,065  [90% CI $22,776,188 - $23,703,190]
+Revenue uplift: $831,653 (3.7%)
+Revenue-at-risk from churn (12mo): $6,479,553 vs. a no-churn baseline

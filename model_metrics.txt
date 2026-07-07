@@ -1,0 +1,8 @@
+N clients: 192
+Churn rate: 0.182
+OOF ROC-AUC: 0.977
+OOF PR-AUC: 0.924
+Chosen threshold: 0.434
+Precision at threshold: 0.795
+Recall at threshold: 0.886
+F1 at threshold: 0.838
